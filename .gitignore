@@ -1,0 +1,40 @@
+# Dependencies and local Orca runtime files
+node_modules/
+.orca/
+
+# Build caches and browser test output
+/build/.cache/
+/build/test-results/
+/build/playwright-report/
+/build/blob-report/
+*.tsbuildinfo
+
+# Generated packages and logs
+/dist/
+/release/
+/releases/
+*.zip
+*.tgz
+*.log
+
+# Local environment configuration; keep example templates
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# Generated artwork and maps; keep capture inputs and listing images
+/build/assets/artwork/
+/assets/social.png
+/social.png
+/panel/*.map
+/worker/*.map
+
+# OS metadata and editor temporary files
+.DS_Store
+._*
+Thumbs.db
+Desktop.ini
+*~
+*.swp
+*.swo

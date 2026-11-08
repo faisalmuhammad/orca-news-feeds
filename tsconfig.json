@@ -1,0 +1,10 @@
+{
+  "extends": "./.orca/types/tsconfig.json",
+  "compilerOptions": {
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "types": ["node"],
+    "typeRoots": ["./build/node_modules/@types"],
+    "allowImportingTsExtensions": true
+  },
+  "include": ["build/src", ".orca/types/**/*.d.ts"]
+}

@@ -1,0 +1,61 @@
+{
+  "$schema": "https://raw.githubusercontent.com/stablyai/orca/main/docs/schemas/plugins/orca-plugin.v2.schema.json",
+  "manifestVersion": 2,
+  "id": "news-feeds",
+  "name": "Feeds",
+  "version": "0.1.0",
+  "description": "A quiet place for RSS, Hacker News, and public Reddit feeds. Save what catches your eye and pick up where you left off.",
+  "license": "MIT",
+  "engines": {
+    "orca": ">=1.4.253"
+  },
+  "execution": "trusted-worker",
+  "pluginApi": 1,
+  "main": "worker/main.mjs",
+  "contributes": {
+    "panels": [
+      {
+        "id": "feeds",
+        "title": "Feeds",
+        "icon": "globe",
+        "entry": "panel/index.html",
+        "ui": "html"
+      }
+    ]
+  },
+  "capabilities": [
+    {
+      "kind": "storage:own"
+    },
+    {
+      "kind": "workspace:read"
+    },
+    {
+      "kind": "agent:launch"
+    }
+  ],
+  "icon": "assets/icon.png",
+  "screenshots": [
+    {
+      "path": "assets/screenshot-reading.png",
+      "alt": "Actual dark Feeds list beside an expanded RSS story, on a slate-blue background.",
+      "caption": "Read and save stories without leaving the list.",
+      "theme": "dark"
+    },
+    {
+      "path": "assets/screenshot-agent.png",
+      "alt": "Actual inline agent question form with sample story context and a preview workspace.",
+      "caption": "Ask about a story in a fresh conversation. Sample form only.",
+      "theme": "light"
+    }
+  ],
+  "author": {
+    "name": "faisalmuhammad",
+    "url": "https://github.com/faisalmuhammad"
+  },
+  "repository": "https://github.com/faisalmuhammad/orca-news-feeds",
+  "cover": {
+    "path": "assets/cover.png",
+    "alt": "Feeds on a deep slate-blue background with copper accents, signal rings and a real sample story list."
+  }
+}

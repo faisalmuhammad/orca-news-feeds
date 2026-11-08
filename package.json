@@ -1,0 +1,22 @@
+{
+  "name": "orca-news-feeds",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build/scripts/build.mjs",
+    "typecheck": "build/node_modules/.bin/tsc --noEmit -p .",
+    "test": "npm run build && node --test tests/*.test.mjs",
+    "preview": "node build/scripts/preview.mjs",
+    "test:browser": "node build/scripts/browser-test.mjs",
+    "release:shots": "node build/scripts/release-shots.mjs",
+    "release:art": "node build/scripts/release-art.mjs",
+    "release:notices": "node build/scripts/release-notices.mjs",
+    "release:check": "node build/scripts/check-release.mjs",
+    "package": "npm run release:check && node build/scripts/package.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "license": "MIT"
+}
