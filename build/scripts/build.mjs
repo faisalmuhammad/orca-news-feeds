@@ -42,6 +42,14 @@ await Promise.all([
     target: "node22",
   }),
   build({
+    entryPoints: [at("build/src/panel/i18n.ts")],
+    outfile: at(".orca/tests/i18n.mjs"),
+    bundle: true,
+    platform: "node",
+    format: "esm",
+    target: "node22",
+  }),
+  build({
     entryPoints: [at("build/src/panel/app.ts")],
     outfile: at("panel/app.js"),
     bundle: true,
