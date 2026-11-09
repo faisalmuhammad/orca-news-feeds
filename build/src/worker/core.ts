@@ -171,6 +171,7 @@ function recover(value: any): Store {
     store.preferences = {
       refreshMinutes: prefs.refreshMinutes,
       compact: prefs.compact === true,
+      language: prefs.language === "zh-CN" ? "zh-CN" : "en",
     };
   return store;
 }
@@ -579,7 +580,11 @@ export class FeedService {
       return { saved: input.saved };
     });
   }
-  async preferences(input: { refreshMinutes?: number; compact?: boolean }) {
+  async preferences(input: {
+    refreshMinutes?: number;
+    compact?: boolean;
+    language?: Store["preferences"]["language"];
+  }) {
     return this.mutate((next) => {
       if (input?.refreshMinutes !== undefined) {
         if (![0, 5, 10, 30, 60].includes(input.refreshMinutes))
@@ -594,6 +599,11 @@ export class FeedService {
         if (typeof input.compact !== "boolean")
           throw new FeedError("Choose a valid list style.", "invalid_params");
         next.preferences.compact = input.compact;
+      }
+      if (input?.language !== undefined) {
+        if (input.language !== "en" && input.language !== "zh-CN")
+          throw new FeedError("Choose a valid language.", "invalid_params");
+        next.preferences.language = input.language;
       }
       return next.preferences;
     });
