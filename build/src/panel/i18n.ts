@@ -10,6 +10,7 @@ const zhCN: Record<string, string> = {
   Undated: "日期未知",
   now: "刚刚",
   "just now": "刚刚",
+  "Updated just now": "刚刚更新",
   Feeds: "订阅",
   "A LITTLE PERSPECTIVE": "换个角度看世界",
   "Refresh feeds": "刷新订阅",

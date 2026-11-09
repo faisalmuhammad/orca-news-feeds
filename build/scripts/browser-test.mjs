@@ -712,6 +712,44 @@ try {
     assert.ok(bridge.requests >= 10, "native request branch exercised");
     assert.equal(bridge.rejected, 0, "all panel request payloads are JSON");
     report.push("native bridge JSON payload validation");
+    press('[data-focus="back"]');
+    wait(".story-card");
+    press('[data-focus="manage-sources"]');
+    wait('[data-focus="language"]');
+    evaluate(`(() => {
+      const language = document.querySelector('[data-focus="language"]');
+      language.value = 'zh-CN';
+      language.dispatchEvent(new Event('change', {bubbles:true}));
+    })()`);
+    call(["wait", "--page", page, "--text", "整理你的订阅角落"]);
+    assert.equal(evaluate("document.documentElement.lang"), "zh-CN");
+    assert.equal(evaluate("document.title"), "订阅");
+    assert.equal(
+      evaluate(
+        'document.querySelector(\'[data-focus="refresh"]\').getAttribute("aria-label")',
+      ),
+      "刷新订阅",
+    );
+    assert.equal(
+      evaluate('document.querySelector(\'[data-focus="language"]\').value'),
+      "zh-CN",
+    );
+    evaluate("location.reload(); true");
+    wait(".story-card");
+    press('[data-focus="manage-sources"]');
+    call(["wait", "--page", page, "--text", "整理你的订阅角落"]);
+    assert.equal(
+      evaluate('document.querySelector(\'[data-focus="language"]\').value'),
+      "zh-CN",
+    );
+    evaluate(`(() => {
+      const language = document.querySelector('[data-focus="language"]');
+      language.value = 'en';
+      language.dispatchEvent(new Event('change', {bubbles:true}));
+    })()`);
+    call(["wait", "--page", page, "--text", "Curate your corner"]);
+    assert.equal(evaluate("document.documentElement.lang"), "en");
+    report.push("English and Chinese switch immediately and persist across reload");
   }
   const consoleResult = call(["console", "--page", page, "--limit", "50"]);
   await writeFile(
