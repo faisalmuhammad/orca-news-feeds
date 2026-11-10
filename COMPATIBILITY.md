@@ -1,6 +1,6 @@
 # Compatibility
 
-Feeds 0.1.0 requires **Orca desktop 1.4.253+** and runs as a **trusted worker** with an HTML sidebar panel. JavaScript, CSS, runtime dependencies and Geist are packaged locally. End users do not need Node/npm or a feed account; developers need Node.js 22+.
+Feeds 0.2.0 requires **Orca desktop 1.4.253+** and runs as a **trusted worker** with an HTML sidebar panel. JavaScript, CSS, runtime dependencies and Geist are packaged locally. End users do not need Node/npm or a feed account; developers need Node.js 22+.
 
 ## Host integration
 

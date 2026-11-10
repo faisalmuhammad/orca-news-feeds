@@ -1,6 +1,6 @@
 # Release preparation
 
-Prepared version: **0.1.0**, future tag **v0.1.0**. Proposed repository: **faisalmuhammad/orca-news-feeds**. This preparation does not create or publish a repository, push commits, tag or submit a catalog entry.
+Prepared version: **0.2.0**, future tag **v0.2.0**. Proposed repository: **faisalmuhammad/orca-news-feeds**. This preparation does not create or publish a repository, push commits, tag or submit a catalog entry.
 
 ## What to upload
 
@@ -69,15 +69,15 @@ git status --short
 After reviewing the staged files:
 
 ```sh
-git commit -m "Release Feeds 0.1.0"
+git commit -m "Release Feeds 0.2.0"
 gh repo create faisalmuhammad/orca-news-feeds --public --source=. --remote=origin --push
 gh repo edit faisalmuhammad/orca-news-feeds --add-topic orca-plugin
-git tag -a v0.1.0 -m "Feeds 0.1.0"
-git push origin v0.1.0
-gh release create v0.1.0 \
+git tag -a v0.2.0 -m "Feeds 0.2.0"
+git push origin v0.2.0
+gh release create v0.2.0 \
   --repo faisalmuhammad/orca-news-feeds \
   --verify-tag \
-  --title "Feeds for Orca 0.1.0" \
+  --title "Feeds for Orca 0.2.0" \
   --notes "RSS, Hacker News and Reddit in Orca's sidebar. Read stories inline, save them for later, and ask an agent in a fresh conversation. Includes opt-in developer sources, feed-supplied images and refreshed artwork."
 ```
 
@@ -86,7 +86,7 @@ These commands publish when you run them; they have not been executed during pre
 After publication, install using:
 
 ```text
-https://github.com/faisalmuhammad/orca-news-feeds#v0.1.0
+https://github.com/faisalmuhammad/orca-news-feeds#v0.2.0
 ```
 
 Verify the Orca listing. Generate a catalog entry, if needed, from the actual published commit:

@@ -3,7 +3,7 @@
   "manifestVersion": 2,
   "id": "news-feeds",
   "name": "Feeds",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A quiet place for RSS, Hacker News, and public Reddit feeds. Save what catches your eye and pick up where you left off.",
   "license": "MIT",
   "engines": {
