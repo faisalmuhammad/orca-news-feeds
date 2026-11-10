@@ -4,7 +4,7 @@ Prepared version: **0.2.0**, future tag **v0.2.0**. Proposed repository: **faisa
 
 ## What to upload
 
-Use the contents of **news-feeds/** as the GitHub repository root. Include orca-plugin.json, compiled panel/ and worker/ files, assets/ with the icon/cover/two screenshots and provenance, build/ with source/scripts/lockfile/licenses/font inputs, tests/, package.json, tsconfig.json, all root documentation and licenses, .gitignore and .gitattributes. Keep **build/assets/captures/**: the artwork generators read its four sample captures. Keep Geist and its OFL in panel/ and build/assets/.
+Use the contents of **news-feeds/** as the GitHub repository root. Include orca-plugin.json, compiled panel/ and worker/ files, assets/ with the icon/cover/two screenshots and provenance, build/ with source/scripts/lockfile/licenses/font inputs and official SDK declarations, tests/, package.json, tsconfig.json, all root documentation and licenses, .github/ workflows and scripts, .gitignore and .gitattributes. Keep **build/assets/captures/**: the artwork generators read its four sample captures. Keep Geist and its OFL in panel/ and build/assets/.
 
 The .gitignore follows the sibling plugins: dependencies, .orca/, build caches/browser reports, package directories, archives, logs, local environment files and OS/editor temporary files are ignored. Environment example templates remain allowed. Generated build/assets/artwork/ SVG exports, source maps and social images are also ignored. Commit final listing PNGs and assets/icon.svg. Artwork is reproducible from scripts and committed captures.
 
@@ -51,37 +51,27 @@ The release check rejects symlinks, unexpected binaries, stale notices and versi
 
 Privacy checks reject local user directory paths, credential tokens, private keys, live agent identifiers and embedded image metadata. Release artwork uses sample data; local diagnostic captures are not included.
 
-## Publish when ready
+## Automated checks and release
 
-For a new public repository, sign in to the account owning faisalmuhammad/orca-news-feeds and run from this folder:
+[.github/workflows/release.yml](.github/workflows/release.yml) runs on pull requests targeting main, pushes to main, version-tag pushes and manual workflow runs. It uses Node.js 22 and the official Orca 1.4.255 CLI on a GitHub-hosted macOS runner. The installer verifies pinned SHA-256 digests for both Intel and Apple Silicon archives and keeps Orca outside the plugin checkout.
 
-```sh
-# Run from the directory containing orca-plugin.json.
-gh auth login --hostname github.com --git-protocol https --web
-gh auth setup-git --hostname github.com
-npm run release:check
-/Applications/Orca.app/Contents/Resources/bin/orca plugin validate . --json
-git init -b main
-git add .
-git status --short
-```
+The workflow installs the lockfile, typechecks against the committed official Orca SDK declarations, builds, runs logic and injected-host tests, audits dependencies, checks release files/artwork/licenses/privacy, and runs Orca's offline manifest validator. It rejects stale committed runtime files. These checks run without opening Orca or starting real agent sessions. Native browser and live agent checks remain local checks.
 
-After reviewing the staged files:
+Before each release, update orca-plugin.json, package.json, build/package.json, both root version fields in build/package-lock.json, and the matching CHANGELOG.md entry. Rebuild and commit the compiled panel/ and worker/ files. The tag must be v followed by the manifest version, and its commit must be merged into main. This workflow accepts stable major.minor.patch releases.
+
+Merge the localization changes and workflow into main before publishing 0.2.0. Then run from an existing repository clone:
 
 ```sh
-git commit -m "Release Feeds 0.2.0"
-gh repo create faisalmuhammad/orca-news-feeds --public --source=. --remote=origin --push
-gh repo edit faisalmuhammad/orca-news-feeds --add-topic orca-plugin
+git switch main
+git pull --ff-only origin main
 git tag -a v0.2.0 -m "Feeds 0.2.0"
 git push origin v0.2.0
-gh release create v0.2.0 \
-  --repo faisalmuhammad/orca-news-feeds \
-  --verify-tag \
-  --title "Feeds for Orca 0.2.0" \
-  --notes "RSS, Hacker News and Reddit in Orca's sidebar. Read stories inline, save them for later, and ask an agent in a fresh conversation. Includes opt-in developer sources, feed-supplied images and refreshed artwork."
 ```
 
-These commands publish when you run them; they have not been executed during preparation. If the repository already exists, use its existing clone/remote and push the commit instead of creating another repository. Leave publisher omitted so Orca derives identity from the repository owner.
+Pushing the tag runs all checks again, then creates **Feeds for Orca 0.2.0** with notes extracted from the 0.2.0 changelog section. There is no separate gh release command and no ZIP/checksum attachment. Existing releases are left unchanged on reruns. A manual Actions run performs checks only. The release job alone gets contents:write; it uses the built-in GITHUB_TOKEN and requires no personal token or other secrets. Keep GitHub Actions enabled for the repository.
+
+
+If a check fails, fix and commit the issue, merge it into main, and use a new version/tag for the release. Do not move a published tag.
 
 After publication, install using:
 
