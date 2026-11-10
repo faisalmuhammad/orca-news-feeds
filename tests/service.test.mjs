@@ -72,6 +72,32 @@ async function seeded(options = {}) {
   const { source } = await feeds.add({ token: preview.token });
   return { feeds, storage, source };
 }
+test("language preference is validated, backward compatible, and survives restart", async () => {
+  const storage = memory(),
+    feeds = new FeedService({ storage });
+  assert.equal((await feeds.snapshot()).preferences.language, "en");
+  await feeds.preferences({ language: "zh-CN" });
+  await assert.rejects(
+    feeds.preferences({ language: "fr" }),
+    /valid language/,
+  );
+  assert.equal((await feeds.snapshot()).preferences.language, "zh-CN");
+  await feeds.dispose();
+
+  const reopened = new FeedService({ storage });
+  assert.equal((await reopened.snapshot()).preferences.language, "zh-CN");
+  const head = storage.data.get("feeds.v1.head"),
+    key = "feeds.v1.data." + head.generation + ".0",
+    legacy = JSON.parse(storage.data.get(key));
+  assert.equal(head.parts, 1);
+  delete legacy.preferences.language;
+  storage.data.set(key, JSON.stringify(legacy));
+  await reopened.dispose();
+
+  const recovered = new FeedService({ storage });
+  assert.equal((await recovered.snapshot()).preferences.language, "en");
+  await recovered.dispose();
+});
 test("concurrent read and save mutations survive restart and source removal", async () => {
   const { feeds, storage, source } = await seeded();
   const item = (await feeds.snapshot()).items[0];

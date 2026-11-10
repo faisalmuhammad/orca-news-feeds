@@ -10,6 +10,7 @@ Runtime output is prebuilt in ../panel/ and ../worker/. This folder holds reprod
 | src/panel/          | UI, styles and glyphs                                          |
 | assets/             | Geist/OFL and committed captures; SVG exports are generated    |
 | licenses/           | Upstream license omitted from an npm package                   |
+| types/              | Official Orca SDK declarations and upstream license            |
 | scripts/            | Build, preview, browser checks, notices, artwork and packaging |
 
 ## Develop
@@ -22,6 +23,8 @@ npm run typecheck
 npm test
 npm run preview
 ```
+
+Typechecking uses the committed official Orca 1.4.255 declaration snapshot in types/. It needs no Orca installation or generated .orca/types/ files. The root config explicitly sets ES2022, ESNext modules and strict typechecking; local plugin loads cannot change the compiler settings. See [SDK provenance](types/README.md).
 
 The build bundles a Node 22 ESM worker and browser IIFE panel, copies HTML/CSS/font assets and creates test bundles in .orca/tests/. End users never run npm. The preview has a separate library, sample data and a mock workspace; it refuses agent launches.
 

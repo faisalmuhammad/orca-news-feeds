@@ -12,6 +12,7 @@ import type {
 } from "../shared/model";
 import { icon } from "./icons";
 import { usefulExcerpt } from "../shared/model";
+import { formatDate, formatDateTime, setLocale, t } from "./i18n";
 type AgentOptions = {
   workspaces: { id: string; name: string; hostId: string | null }[];
   suggestedId: string | null;
@@ -197,11 +198,12 @@ async function request<T = any>(
 }
 function el<K extends keyof HTMLElementTagNameMap>(
   tag: K,
-  text?: string,
+  text?: string | { raw: string },
   cls?: string,
 ): HTMLElementTagNameMap[K] {
   const node = document.createElement(tag);
-  if (text !== undefined) node.textContent = text;
+  if (text !== undefined)
+    node.textContent = typeof text === "string" ? t(text) : text.raw;
   if (cls) node.className = cls;
   return node;
 }
@@ -215,7 +217,7 @@ function button(
   const b = el("button", undefined, cls);
   b.type = "button";
   if (glyph) b.append(icon(glyph));
-  if (text) b.append(document.createTextNode(text));
+  if (text) b.append(document.createTextNode(t(text)));
   if (key) b.dataset.focus = key;
   b.onclick = () => void action();
   return b;
@@ -234,14 +236,15 @@ function iconButton(
     glyph,
     key,
   );
-  b.setAttribute("aria-label", label);
-  b.title = label;
+  b.setAttribute("aria-label", t(label));
+  b.title = t(label);
   return b;
 }
 function announce(text: string) {
   announcer.textContent = "";
-  requestAnimationFrame(() => (announcer.textContent = text));
+  requestAnimationFrame(() => (announcer.textContent = t(text)));
 }
+const raw = (text: string) => ({ raw: text });
 function fail(error: unknown) {
   state.error =
     error instanceof Error
@@ -293,7 +296,7 @@ function relative(at: number | null) {
   const d = Math.floor(h / 24);
   return d < 7
     ? d + "d"
-    : new Date(at).toLocaleDateString(undefined, {
+    : formatDate(at, {
         month: "short",
         day: "numeric",
       });
@@ -510,8 +513,9 @@ function footer() {
     ),
   );
   if (updated)
-    foot.title =
-      "Last successful update: " + new Date(updated).toLocaleString();
+    foot.title = t("Last successful update: {date}", {
+      date: formatDateTime(updated),
+    });
   if (failures)
     foot.append(
       button(
@@ -535,6 +539,7 @@ function footer() {
 }
 function render() {
   if (state.closed) return;
+  setLocale(state.snapshot?.preferences.language ?? "en");
   const focus = captureFocus();
   imageObserver?.disconnect();
   imageQueue = [];
@@ -750,7 +755,7 @@ function renderSourceSuggestions(
   const section = el("section", undefined, "starter-feeds");
   section.setAttribute(
     "aria-label",
-    kind === "rss" ? "Starter RSS feeds" : "Suggested subreddits",
+    t(kind === "rss" ? "Starter RSS feeds" : "Suggested subreddits"),
   );
   section.append(el("h3", title), el("p", intro, "starter-intro"));
   const list = el("div", undefined, "starter-list");
@@ -772,7 +777,10 @@ function renderSourceSuggestions(
         "follow-" + feed.id,
       ),
       text = el("span", undefined, "starter-text");
-    text.append(el("strong", feed.label), el("small", feed.description));
+    text.append(
+      el("strong", raw(feed.label)),
+      el("small", feed.description),
+    );
     choice.append(
       sourceMark(kind),
       text,
@@ -784,7 +792,7 @@ function renderSourceSuggestions(
     );
     choice.setAttribute(
       "aria-label",
-      (followed ? "Following " : "Follow ") + feed.label,
+      t((followed ? "Following " : "Follow ") + feed.label),
     );
     choice.disabled = followed || state.working;
     list.append(choice);
@@ -832,7 +840,7 @@ function renderList() {
   top.append(
     el(
       "span",
-      new Date().toLocaleDateString(undefined, {
+      formatDate(new Date(), {
         weekday: "long",
         month: "short",
         day: "numeric",
@@ -843,12 +851,12 @@ function renderList() {
   const count = el("span", undefined, "unread-badge");
   count.append(
     el("span", undefined, "tiny-dot"),
-    document.createTextNode(s.unread + " unread"),
+    document.createTextNode(t(s.unread + " unread")),
   );
   top.append(count);
   app.append(top);
   const tabs = el("nav", undefined, "tabs");
-  tabs.setAttribute("aria-label", "Feed filters");
+  tabs.setAttribute("aria-label", t("Feed filters"));
   for (const [value, label, glyph] of [
     ["all", "All", "all"],
     ["rss", "RSS", "feed"],
@@ -872,8 +880,8 @@ function renderList() {
     line = el("div", undefined, "toolbar-line"),
     select = el("select", undefined, "source-select");
   select.dataset.focus = "source-select";
-  select.setAttribute("aria-label", "Feed source");
-  select.append(new Option("All sources", ""));
+  select.setAttribute("aria-label", t("Feed source"));
+  select.append(new Option(t("All sources"), ""));
   for (const source of s.sources.filter(
     (x) =>
       state.filter === "all" ||
@@ -881,7 +889,10 @@ function renderList() {
       x.kind === state.filter,
   ))
     select.append(
-      new Option(source.label + (source.enabled ? "" : " · paused"), source.id),
+      new Option(
+        source.label + (source.enabled ? "" : t(" · paused")),
+        source.id,
+      ),
     );
   select.value = state.sourceId;
   select.onchange = () => {
@@ -894,11 +905,11 @@ function renderList() {
   line.append(select);
   if (state.sourceId) {
     const order = el("select", undefined, "order-select");
-    order.setAttribute("aria-label", "Story order");
+    order.setAttribute("aria-label", t("Story order"));
     order.dataset.focus = "story-order";
     order.append(
-      new Option("Source order", "source"),
-      new Option("Newest", "latest"),
+      new Option(t("Source order"), "source"),
+      new Option(t("Newest"), "latest"),
     );
     order.value = state.order;
     order.onchange = () => {
@@ -913,10 +924,10 @@ function renderList() {
     box = el("div", undefined, "searchbox"),
     search = el("input");
   search.type = "search";
-  search.placeholder = "Find a story…";
+  search.placeholder = t("Find a story…");
   search.value = state.query;
   search.maxLength = 300;
-  search.setAttribute("aria-label", "Search headlines");
+  search.setAttribute("aria-label", t("Search headlines"));
   search.dataset.focus = "search";
   search.oninput = () => {
     state.query = search.value;
@@ -962,7 +973,7 @@ function renderList() {
     undefined,
     "mark-read",
   );
-  markRead.title = "Mark all items matching these filters read";
+  markRead.title = t("Mark all items matching these filters read");
   markRead.disabled = state.working || !s.total;
   info.append(markRead);
   app.append(info);
@@ -1000,7 +1011,7 @@ function renderList() {
   if (s.items.length) {
     const list = el("div", undefined, "story-list");
     list.setAttribute("role", "list");
-    list.setAttribute("aria-label", "News stories");
+    list.setAttribute("aria-label", t("News stories"));
     for (const item of s.items) list.append(renderRow(item));
     main.append(list);
   }
@@ -1043,8 +1054,10 @@ function renderRow(item: ViewItem) {
     sourceMark(item.kind),
     el(
       "span",
-      state.snapshot?.sources.find((s) => s.id === state.sourceId)?.label ??
-        item.sourceLabel,
+      raw(
+        state.snapshot?.sources.find((s) => s.id === state.sourceId)?.label ??
+          item.sourceLabel,
+      ),
       "source-name",
     ),
   );
@@ -1054,7 +1067,7 @@ function renderRow(item: ViewItem) {
     saved.classList.add("saved-indicator");
     saved.removeAttribute("aria-hidden");
     saved.setAttribute("role", "img");
-    saved.setAttribute("aria-label", "Saved story");
+    saved.setAttribute("aria-label", t("Saved story"));
     source.append(saved);
   }
   const at = el(
@@ -1063,9 +1076,10 @@ function renderRow(item: ViewItem) {
     "timestamp",
   );
   at.title = item.publishedAt
-    ? new Date(item.publishedAt).toLocaleString()
-    : "Publication date unavailable; first seen " +
-      new Date(item.firstSeenAt).toLocaleString();
+    ? formatDateTime(item.publishedAt)
+    : t("Publication date unavailable; first seen {date}", {
+        date: formatDateTime(item.firstSeenAt),
+      });
   source.append(at);
   const title = button(
     "",
@@ -1077,7 +1091,7 @@ function renderRow(item: ViewItem) {
   title.dataset.item = item.id;
   title.setAttribute("aria-expanded", String(expanded));
   title.setAttribute("aria-controls", "details-" + item.id);
-  const heading = el("span", item.title),
+  const heading = el("span", raw(item.title)),
     chevron = icon("chevron");
   chevron.classList.add("card-chevron");
   title.append(heading, chevron);
@@ -1087,17 +1101,19 @@ function renderRow(item: ViewItem) {
   if (item.imageUrl && (!state.snapshot?.preferences.compact || expanded))
     body.append(renderImage(item));
   body.append(storyHeading);
-  if (summary && !expanded) body.append(el("p", summary, "row-summary"));
+  if (summary && !expanded)
+    body.append(el("p", raw(summary), "row-summary"));
   const bottom = el("div", undefined, "row-bottom");
   if (item.score !== undefined) {
     const metric = el("span", undefined, "metric");
     metric.append(icon("up"), document.createTextNode(String(item.score)));
-    metric.title = item.score + " points on Hacker News";
+    metric.title = t(item.score + " points on Hacker News");
     bottom.append(metric);
   }
   if (item.kind === "reddit")
     bottom.append(el("span", "Community thread", "domain"));
-  else if (item.url) bottom.append(el("span", domain(item.url), "domain"));
+  else if (item.url)
+    bottom.append(el("span", raw(domain(item.url)), "domain"));
   body.append(bottom);
   const details = renderDetails(item);
   details.hidden = !expanded;
@@ -1190,22 +1206,33 @@ function renderDetails(item: ViewItem) {
   details.append(
     el(
       "p",
-      (item.author ? "By " + item.author + " · " : "") +
-        (item.publishedAt
-          ? new Date(item.publishedAt).toLocaleDateString(undefined, {
+      item.author
+        ? t("By {author} · {date}", {
+            author: item.author,
+            date: item.publishedAt
+              ? formatDate(item.publishedAt, {
+                  month: "long",
+                  day: "numeric",
+                  year: "numeric",
+                })
+              : t("Publication date unavailable"),
+          })
+        : item.publishedAt
+          ? formatDate(item.publishedAt, {
               month: "long",
               day: "numeric",
               year: "numeric",
             })
-          : "Publication date unavailable"),
+          : t("Publication date unavailable"),
       "byline",
     ),
   );
   details.append(
     el(
       "p",
-      summary ||
-        "This feed shares the headline. Open the source for the full story, or ask an agent to explore it with you.",
+      summary
+        ? raw(summary)
+        : "This feed shares the headline. Open the source for the full story, or ask an agent to explore it with you.",
       "full-summary" + (summary ? "" : " no-summary"),
     ),
   );
@@ -1278,7 +1305,7 @@ function switchButton(
 ) {
   const b = button("", action, "switch", undefined, key);
   b.setAttribute("role", "switch");
-  b.setAttribute("aria-label", label);
+  b.setAttribute("aria-label", t(label));
   b.setAttribute("aria-checked", String(checked));
   b.disabled = state.working;
   return b;
@@ -1305,14 +1332,16 @@ function renderSources() {
       top = el("div", undefined, "source-card-top"),
       title = el("div", undefined, "source-card-title");
     title.append(
-      el("strong", s.label),
+      el("strong", raw(s.label)),
       el(
         "small",
-        s.kind === "rss"
-          ? domain(s.url ?? null)
-          : s.kind === "hn"
-            ? "Hacker News · " + s.category
-            : s.subreddit + " · " + s.sort,
+        raw(
+          s.kind === "rss"
+            ? domain(s.url ?? null)
+            : s.kind === "hn"
+              ? "Hacker News · " + s.category
+              : s.subreddit + " · " + s.sort,
+        ),
       ),
     );
     top.append(
@@ -1358,8 +1387,10 @@ function renderSources() {
       bottom.append(retry);
     }
     card.append(bottom);
-    if (s.cache.error) card.append(el("p", s.cache.error, "source-error"));
-    if (s.cache.notice) card.append(el("p", s.cache.notice, "source-notice"));
+    if (s.cache.error)
+      card.append(el("p", raw(s.cache.error), "source-error"));
+    if (s.cache.notice)
+      card.append(el("p", raw(s.cache.notice), "source-notice"));
     if (state.editId === s.id) {
       const edit = el("div", undefined, "source-edit");
       edit.append(
@@ -1424,14 +1455,14 @@ function renderSources() {
   const select = el("select");
   select.id = "refresh-interval";
   select.dataset.focus = "refresh-interval";
-  for (const [v, t] of [
+  for (const [v, text] of [
     [0, "Manual"],
     [5, "Every 5 min"],
     [10, "Every 10 min"],
     [30, "Every 30 min"],
     [60, "Every hour"],
   ] as const)
-    select.append(new Option(t, String(v)));
+    select.append(new Option(t(text), String(v)));
   select.value = String(state.snapshot!.preferences.refreshMinutes);
   select.disabled = state.working;
   select.onchange = () =>
@@ -1454,9 +1485,27 @@ function renderSources() {
       "compact",
     ),
   );
+  const language = el("div", undefined, "preference-row"),
+    languageLabel = el("label", "Language"),
+    languageSelect = el("select");
+  languageLabel.htmlFor = "language";
+  languageSelect.id = "language";
+  languageSelect.dataset.focus = "language";
+  languageSelect.append(
+    new Option(t("English"), "en"),
+    new Option(t("Simplified Chinese"), "zh-CN"),
+  );
+  languageSelect.value = state.snapshot!.preferences.language;
+  languageSelect.disabled = state.working;
+  languageSelect.onchange = () =>
+    void perform(() =>
+      request("preferences.update", { language: languageSelect.value }),
+    );
+  language.append(languageLabel, languageSelect);
   prefs.append(
     row,
     compact,
+    language,
     el(
       "p",
       "Automatic refresh runs while you are focused in this panel. Saved stories stay available when a source is paused or removed.",
@@ -1516,7 +1565,7 @@ function textField(
   input.dataset.focus = key;
   input.value = value;
   input.maxLength = max;
-  input.placeholder = placeholder;
+  input.placeholder = t(placeholder);
   input.oninput = () => change(input.value);
   field.append(name, input);
   return field;
@@ -1525,7 +1574,7 @@ function selectField(
   label: string,
   key: string,
   value: string,
-  options: readonly (readonly [string, string])[],
+  options: readonly (readonly [string, string | { raw: string }])[],
   change: (v: string) => void,
 ) {
   const field = el("div", undefined, "field"),
@@ -1534,7 +1583,10 @@ function selectField(
   name.htmlFor = key;
   select.id = key;
   select.dataset.focus = key;
-  for (const [v, t] of options) select.append(new Option(t, v));
+  for (const [v, text] of options)
+    select.append(
+      new Option(typeof text === "string" ? t(text) : text.raw, v),
+    );
   select.value = value;
   select.onchange = () => change(select.value);
   field.append(name, select);
@@ -1662,7 +1714,7 @@ function renderAdd() {
       fetching.setAttribute("role", "status");
       fetching.append(
         icon("refresh"),
-        document.createTextNode("Finding a few good stories…"),
+        document.createTextNode(t("Finding a few good stories…")),
       );
       form.append(fetching);
     }
@@ -1671,7 +1723,10 @@ function renderAdd() {
     const preview = state.preview,
       card = el("div", undefined, "preview-card"),
       top = el("div", undefined, "row-source");
-    top.append(sourceMark(preview.source.kind), el("h3", preview.source.label));
+    top.append(
+      sourceMark(preview.source.kind),
+      el("h3", raw(preview.source.label)),
+    );
     card.append(
       top,
       el(
@@ -1684,7 +1739,7 @@ function renderAdd() {
       ),
     );
     for (const item of preview.items)
-      card.append(el("p", item.title, "preview-headline"));
+      card.append(el("p", raw(item.title), "preview-headline"));
     if (!preview.items.length)
       card.append(
         el(
@@ -1693,7 +1748,8 @@ function renderAdd() {
           "preview-headline",
         ),
       );
-    if (preview.notice) card.append(el("p", preview.notice, "source-notice"));
+    if (preview.notice)
+      card.append(el("p", raw(preview.notice), "source-notice"));
     section.append(
       card,
       textField(
@@ -1825,7 +1881,7 @@ function requestId() {
 function renderAsk(item: ViewItem) {
   const section = el("section", undefined, "inline-ask");
   section.id = "ask-" + item.id;
-  section.setAttribute("aria-label", "Ask about " + item.title);
+  section.setAttribute("aria-label", t("Ask about " + item.title));
   section.append(
     el("h3", "A little more context."),
     el("p", "Start a fresh conversation about this story.", "section-intro"),
@@ -1834,11 +1890,12 @@ function renderAsk(item: ViewItem) {
     section.append(
       empty(
         "Your conversation is open",
-        "Your question was sent to a fresh " +
-          state.agent +
-          (state.askResult.kind === "chat"
-            ? " chat in the selected workspace."
-            : " terminal session in the selected workspace."),
+        t(
+          state.askResult.kind === "chat"
+            ? "Your question was sent to a fresh {agent} chat in the selected workspace."
+            : "Your question was sent to a fresh {agent} terminal session in the selected workspace.",
+          { agent: state.agent },
+        ),
         "comments",
       ),
       button("Close agent form", closeAsk, "button secondary full"),
@@ -1853,7 +1910,9 @@ function renderAsk(item: ViewItem) {
     textarea.rows = 3;
     textarea.maxLength = 4000;
     textarea.value = state.question;
-    textarea.placeholder = "Why does this matter? What is the bigger picture?";
+    textarea.placeholder = t(
+      "Why does this matter? What is the bigger picture?",
+    );
     textarea.oninput = () => (state.question = textarea.value);
     textarea.disabled = state.askPending;
     field.append(label, textarea);
@@ -1869,10 +1928,12 @@ function renderAsk(item: ViewItem) {
         () => {
           state.question =
             question === "Explain the story"
-              ? "Explain this story and give me the useful context."
+              ? t("Explain this story and give me the useful context.")
               : question === "Why does it matter?"
-                ? "Why does this story matter, and who is affected?"
-                : "Check the key claims in this story against reliable sources.";
+                ? t("Why does this story matter, and who is affected?")
+                : t(
+                    "Check the key claims in this story against reliable sources.",
+                  );
           render();
         },
         "question-chip",
@@ -1894,9 +1955,13 @@ function renderAsk(item: ViewItem) {
               (w) =>
                 [
                   w.id,
-                  w.name +
-                    (w.hostId && w.hostId !== "local" ? " · remote" : ""),
-                ] as [string, string],
+                  raw(
+                    w.name +
+                      (w.hostId && w.hostId !== "local"
+                        ? t(" · remote")
+                        : ""),
+                  ),
+                ] as [string, { raw: string }],
             ),
           ],
           (v) => (state.workspaceId = v),
@@ -2023,7 +2088,7 @@ function setupPreview() {
     ),
   );
   const width = el("select");
-  width.setAttribute("aria-label", "Preview width");
+  width.setAttribute("aria-label", t("Preview width"));
   for (const n of [240, 320, 440])
     width.append(new Option(n + "px", String(n)));
   width.value = params.get("width") ?? "320";

@@ -48,6 +48,7 @@ export type Cache = {
 export type Preferences = {
   refreshMinutes: 0 | 5 | 10 | 30 | 60;
   compact: boolean;
+  language: "en" | "zh-CN";
 };
 export type AskRecord = {
   fingerprint: string;
@@ -146,7 +147,7 @@ export const emptyStore = (): Store => ({
   read: {},
   saved: {},
   asks: {},
-  preferences: { refreshMinutes: 0, compact: false },
+  preferences: { refreshMinutes: 0, compact: false, language: "en" },
 });
 export class FeedError extends Error {
   constructor(
