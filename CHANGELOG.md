@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.2.0 - Chinese localization
+- Add English and Simplified Chinese UI translations
+- Add a language selector under personalization settings
+- Apply language changes immediately without restarting the plugin
+- Persist the selected language across reloads and restarts
+- Default existing and legacy installations to English
+- Localize dates, document metadata, accessibility labels, placeholders, tooltips, and agent prompts
+- Keep feed names, article titles, summaries, and other external content in their original language
+- Add automated coverage for translations, preference validation, persistence, and legacy data recovery
+- Add browser test scenarios for switching languages and retaining the selection after reload
+
 ## 0.1.0 — initial release preparation, 2026-11-08
 
 - RSS/Atom, Hacker News and public Reddit feeds in Orca’s right sidebar.

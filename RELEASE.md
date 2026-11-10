@@ -70,12 +70,6 @@ git push origin v0.2.0
 
 Pushing the tag runs all checks again, then creates **Feeds for Orca 0.2.0** with notes extracted from the 0.2.0 changelog section. There is no separate gh release command and no ZIP/checksum attachment. Existing releases are left unchanged on reruns. A manual Actions run performs checks only. The release job alone gets contents:write; it uses the built-in GITHUB_TOKEN and requires no personal token or other secrets. Keep GitHub Actions enabled for the repository.
 
-Monitor the run:
-
-```sh
-gh run list --repo faisalmuhammad/orca-news-feeds --workflow release.yml
-gh run watch --repo faisalmuhammad/orca-news-feeds
-```
 
 If a check fails, fix and commit the issue, merge it into main, and use a new version/tag for the release. Do not move a published tag.
 

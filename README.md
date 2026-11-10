@@ -6,22 +6,22 @@
 
 RSS and Atom, Hacker News, and public Reddit communities in one quiet sidebar. Follow your sources, save a good read, and ask an agent to help make sense of a story.
 
-Version **0.1.0** is prepared locally for release. Publication instructions and the proposed repository are in [RELEASE.md](RELEASE.md).
+Version **0.2.0** is prepared locally for release. Publication instructions and the proposed repository are in [RELEASE.md](RELEASE.md).
 
 ## Install
 
 Requires **Orca desktop 1.4.253 or newer**. The repository includes the compiled worker, panel, dependencies and font. Reading feeds needs no npm install, service, account or API key.
 
-Once **v0.1.0** is published:
+Once **v0.2.0** is published:
 
 1. Open **Settings → Plugins**.
 2. Choose **Add plugin → From a Git URL…** and enter:
 
    ```text
-   https://github.com/faisalmuhammad/orca-news-feeds#v0.1.0
+   https://github.com/faisalmuhammad/orca-news-feeds#v0.2.0
    ```
 
-   Keep #v0.1.0 at the end to install the release tag.
+   Keep #v0.2.0 at the end to install the release tag.
 
 3. Review and approve the trusted worker, private storage, workspace discovery and agent-launch access.
 4. Open **Feeds** from the globe icon in the right sidebar.

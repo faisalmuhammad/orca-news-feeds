@@ -20,7 +20,7 @@ var emptyStore = () => ({
   read: {},
   saved: {},
   asks: {},
-  preferences: { refreshMinutes: 0, compact: false }
+  preferences: { refreshMinutes: 0, compact: false, language: "en" }
 });
 var FeedError = class extends Error {
   constructor(message, code = "action_failed", retryAfterMs = 0) {
@@ -7151,7 +7151,8 @@ function recover(value) {
   if (prefs && [0, 5, 10, 30, 60].includes(prefs.refreshMinutes))
     store.preferences = {
       refreshMinutes: prefs.refreshMinutes,
-      compact: prefs.compact === true
+      compact: prefs.compact === true,
+      language: prefs.language === "zh-CN" ? "zh-CN" : "en"
     };
   return store;
 }
@@ -7529,6 +7530,11 @@ var FeedService = class {
         if (typeof input.compact !== "boolean")
           throw new FeedError("Choose a valid list style.", "invalid_params");
         next.preferences.compact = input.compact;
+      }
+      if (input?.language !== void 0) {
+        if (input.language !== "en" && input.language !== "zh-CN")
+          throw new FeedError("Choose a valid language.", "invalid_params");
+        next.preferences.language = input.language;
       }
       return next.preferences;
     });
